@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FDB4B9AC-12C3-40EA-8657-D1F4EE1C8A8B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MrHuo.DataBaseHelper</RootNamespace>
+    <AssemblyName>MrHuo.DataBaseHelper</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\MrHuo.DataBaseHelper.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>MrHuo.DataBaseHelper.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assert.cs" />
+    <Compile Include="DataBaseConstructHelperFactory.cs" />
+    <Compile Include="DataBaseType.cs" />
+    <Compile Include="DbConnectionFactory.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Interfaces\IDataBaseConstructHelper.cs" />
+    <Compile Include="Interfaces\TestConnectionResult.cs" />
+    <Compile Include="MySql\MySqlDataBaseConstructHelper.cs" />
+    <Compile Include="MySql\MySqlSQL.cs" />
+    <Compile Include="Objects\Column.cs" />
+    <Compile Include="Objects\ForeignKey.cs" />
+    <Compile Include="Objects\Function.cs" />
+    <Compile Include="Objects\Procedure.cs" />
+    <Compile Include="Objects\ProcedureColumn.cs" />
+    <Compile Include="Objects\Table.cs" />
+    <Compile Include="Objects\View.cs" />
+    <Compile Include="Objects\ViewColumn.cs" />
+    <Compile Include="Postgresql\PostgresqlDataBaseConstructHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\RS.cs" />
+    <Compile Include="SQLite\SQLiteDataBaseConstructHelper.cs" />
+    <Compile Include="SqlServer\SqlServerDataBaseConstructHelper.cs" />
+    <Compile Include="SqlServer\SqlServerSQL.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MrHuo.DataBaseHelper.snk" />
+    <None Include="Resources\MySql.Data.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\System.Data.SQLite.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Oracle.DataAccess.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Oracle.DataAccess.64.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Oracle.DataAccess.86.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Npgsql.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

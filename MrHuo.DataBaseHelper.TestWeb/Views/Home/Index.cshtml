@@ -1,0 +1,355 @@
+﻿@{
+    ViewBag.Title = "MrHuo.DataBaseHelper 测试";
+}
+
+<h3>获取数据库结构</h3>
+<script src="/Scripts/jquery-1.10.2.min.js"></script>
+<div class="row">
+    <form role="form">
+        <div class="form-group col-xs-12">
+            <label for="dataBaseType">数据库类型</label>
+            <select id="dataBaseType" class="form-control">
+                <option value="SqlServer">SqlServer</option>
+                <option value="MySql">MySql</option>
+                @*<option value="Oracle" disabled="disabled">Oracle</option>
+                    <option value="SQLite" disabled="disabled">SQLite</option>
+                    <option value="Postgresql" disabled="disabled">Postgresql</option>*@
+            </select>
+        </div>
+        <div class="form-group col-xs-12">
+            <label for="exampleInputEmail1">数据库连接字符串</label>
+            <textarea id="dataBaseConnectionString" class="form-control" rows="3" placeholder="输入数据库连接字符串">Data Source=(local);User ID=sa;Password=1986929;Initial Catalog=aa;</textarea>
+        </div>
+        <div id="buttonsContainer" class="col-xs-12">
+            <button type="button" data-action="testConnect" class="btn btn-default">测试数据库连接</button>
+            <button type="button" data-action="getTables" class="btn btn-default" disabled="disabled">表</button>
+            <button type="button" data-action="getProcedures" class="btn btn-default" disabled="disabled">存储过程</button>
+            <button type="button" data-action="getViews" class="btn btn-default" disabled="disabled">视图</button>
+            <button type="button" data-action="getFunctions" class="btn btn-default" disabled="disabled">函数</button>
+            <button type="button" data-action="getForeignKeys" class="btn btn-default" disabled="disabled">外键关系</button>
+            <button id="reset" type="button" class="btn btn-warning" disabled="disabled" onclick="location.reload()">重置</button>
+        </div>
+    </form>
+</div>
+<hr />
+<div id="result"></div>
+<div id="resultEx"></div>
+
+@section Footer{
+    <script type="text/javascript">
+        var connectionSuccess = false;
+        var actions = {
+            ensureConnectionSuccess: function () {
+                if (connectionSuccess) {
+                    $("#dataBaseType").prop("disabled", true);
+                    $("#dataBaseConnectionString").prop("disabled", true);
+                } else {
+                    $("#dataBaseType").prop("disabled", false);
+                    $("#dataBaseConnectionString").prop("disabled", false);
+                }
+                return connectionSuccess;
+            },
+            getDbType: function () {
+                return $("#dataBaseType").val();
+            },
+            getDbConnectionString: function () {
+                return $("#dataBaseConnectionString").val();
+            },
+            buidTables: function (titles, data, action) {
+                if (typeof (titles) === "undefined" || titles.length == 0) {
+                    return "undefined";
+                }
+                var html = [];
+                var titleKeys = [];
+                html.push('<table class="table table-bordered">');
+                html.push('<thead>');
+                html.push('<tr>');
+                for (var i = 0; i < titles.length; i++) {
+                    var titleArray = titles[i].split(':');
+                    html.push('<th>' + titleArray[1] + '</th>');
+                    titleKeys.push(titleArray[0]);
+                }
+                action = "" || action;
+                if (action) {
+                    html.push('<th width="210">操作</th>');
+                }
+                html.push('</tr>');
+                html.push('</thead>');
+                html.push('<tbody>');
+                if (data.length == 0) {
+                    html.push('<tr>');
+                    html.push('<td colspan="' + (titles.length + (action.length > 0 ? 1 : 0)) + '">0条数据</td>');
+                    html.push('</tr>');
+                } else {
+                    for (var d in data) {
+                        var _d = data[d];
+                        html.push('<tr>');
+                        for (var i in _d) {
+                            var _t = titleKeys[i];
+                            var _v = _d[i];
+                            if (_v == null) {
+                                _v = "&nbsp;";
+                            }
+                            html.push('<td>' + _v + '</td>');
+                        }
+                        if (action) {
+                            html.push('<td>');
+                            for (var i in action) {
+                                var _a = action[i];
+                                html.push('<button href="javascript:;" class="action action' + i + ' btn btn-primary" data-val="' + _d[titleKeys[0]] + '">' + _a + '</button>&nbsp;');
+                            }
+                            html.push('</td>');
+                        }
+                        html.push('</tr>');
+                    }
+                }
+                html.push('</tbody>');
+                return html.join('');
+            },
+            getTableColumns: function ($this, table) {
+                $this.prop("disabled", true);
+                $.post("/home/GetColumns", { table: table }, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#resultEx").html(
+                            actions.buidTables(
+                                [
+                                    "ColumnName:字段名",
+                                    "ColumnType:字段类型",
+                                    "ColumnLength:字段长度",
+                                    "ColumnDescription:字段描述",
+                                    "DefaultValue:默认值",
+                                    "IsIdentity:标识列",
+                                    "IsPrimaryKey:主键",
+                                    "IsNullable:可为空",
+                                    "CSharpType:C#类型"
+                                ],
+                                data.data
+                            )
+                        );
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getProcedureColumns: function ($this, procedure) {
+                $this.prop("disabled", true);
+                $.post("/home/GetProcedureColumns", { procedure: procedure }, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#resultEx").html(
+                            actions.buidTables(
+                                [
+                                    "ColumnName:字段名",
+                                    "ColumnType:字段类型",
+                                    "ColumnLength:字段长度",
+                                    "CSharpType:C#类型"
+                                ],
+                                data.data
+                            )
+                        );
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getProcedureScript: function ($this, procedure) {
+                $this.prop("disabled", true);
+                $.post("/home/GetProcedureScript", { procedure: procedure }, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#resultEx").html('<pre>' + data.data + '</pre>');
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getFunctionScript: function ($this, func) {
+                $this.prop("disabled", true);
+                $.post("/home/GetFunctionScript", { "function": func }, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#resultEx").html('<pre>' + data.data + '</pre>');
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getViewColumns: function ($this, view) {
+                $this.prop("disabled", true);
+                $.post("/home/GetViewColumns", { view: view }, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#resultEx").html(
+                            actions.buidTables(
+                                [
+                                    "ColumnName:字段名",
+                                    "ColumnType:字段类型",
+                                    "ColumnLength:字段长度",
+                                    "CSharpType:C#类型"
+                                ],
+                                data.data
+                            )
+                        );
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getViewScript: function ($this, view) {
+                $this.prop("disabled", true);
+                $.post("/home/GetViewScript", { view: view }, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#resultEx").html('<pre>' + data.data + '</pre>');
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            testConnect: function ($this) {
+                if (this.getDbConnectionString().length == 0) {
+                    alert("数据库连接字符串不能为空！");
+                    $("#dataBaseConnectionString").focus();
+                    return false;
+                }
+                $this.html("正在测试数据库连接...").prop("disabled", true);
+                $.post("/home/TestConnect", {
+                    dbType: this.getDbType(),
+                    dbConnString: this.getDbConnectionString()
+                }, function (data) {
+                    if (data.ret) {
+                        $this.html("测试数据库连接");
+                        connectionSuccess = true;
+                        actions.ensureConnectionSuccess();
+                        $("#buttonsContainer button").not('[data-action="testConnect"]').removeProp("disabled");
+                        return;
+                    }
+                    $this.html("测试数据库连接").removeProp("disabled");
+                    alert(data.msg);
+                }, "json");
+            },
+            getTables: function ($this) {
+                $this.prop("disabled", true);
+                $("#resultEx").empty();
+
+                $.post("/home/GetTables", {}, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#result").html(
+                            actions.buidTables(
+                                ["TableName:表名", "TableDescription:描述", "CreateDate:创建日期"],
+                                data.data,
+                                ["表结构"]
+                            )
+                        );
+                        $("#result button.action").click(function () {
+                            $("#resultEx").empty().append(actions.getTableColumns($(this), $(this).data("val")));
+                        });
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getProcedures: function ($this) {
+                $this.prop("disabled", true);
+                $("#resultEx").empty();
+
+                $.post("/home/GetProcedures", {}, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#result").html(
+                            actions.buidTables(
+                                ["ProcedureName:存储过程名", "ProcedureDescription:描述", "CreateDate:创建日期"],
+                                data.data,
+                                ["查看参数", "查看脚本"]
+                            )
+                        );
+                        $("#result button.action0").click(function () {
+                            $("#resultEx").empty().append(actions.getProcedureColumns($(this), $(this).data("val")));
+                        });
+                        $("#result button.action1").click(function () {
+                            $("#resultEx").empty().append(actions.getProcedureScript($(this), $(this).data("val")));
+                        });
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getViews: function ($this) {
+                $this.prop("disabled", true);
+                $("#resultEx").empty();
+
+                $.post("/home/GetViews", {}, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#result").html(
+                            actions.buidTables(
+                                ["ViewName:视图名称", "CreateDate:创建日期"],
+                                data.data,
+                                ["查看参数", "查看脚本"]
+                            )
+                        );
+                        $("#result button.action0").click(function () {
+                            $("#resultEx").empty().append(actions.getViewColumns($(this), $(this).data("val")));
+                        });
+                        $("#result button.action1").click(function () {
+                            $("#resultEx").empty().append(actions.getViewScript($(this), $(this).data("val")));
+                        });
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getFunctions: function ($this) {
+                $this.prop("disabled", true);
+                $("#resultEx").empty();
+
+                $.post("/home/GetFunctions", {}, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#result").html(
+                            actions.buidTables(
+                                ["FunctionName:视图名称", "FunctionDescription:函数描述", "FunctionType:函数类型", "CreateDate:创建日期"],
+                                data.data,
+                                ["查看脚本"]
+                            )
+                        );
+                        $("#result button.action0").click(function () {
+                            $("#resultEx").empty().append(actions.getFunctionScript($(this), $(this).data("val")));
+                        });
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            },
+            getForeignKeys: function ($this) {
+                $this.prop("disabled", true);
+                $("#resultEx").empty();
+
+                $.post("/home/GetForeignKeys", {}, function (data) {
+                    $this.removeProp("disabled");
+                    if (data.ret) {
+                        $("#result").html(
+                            actions.buidTables(
+                                [
+                                    "ForeignKeyName:外键名称",
+                                    "SourceTable:源表",
+                                    "SourceColumn:源表字段",
+                                    "ReferencedTable:引用表",
+                                    "ReferencedColumn:引用表字段"
+                                ],
+                                data.data
+                            )
+                        );
+                        return;
+                    }
+                    alert(data.msg);
+                }, "json");
+            }
+        };
+        $("button.btn").click(function () {
+            actions[$(this).data("action")]($(this));
+        });
+    </script>
+}
